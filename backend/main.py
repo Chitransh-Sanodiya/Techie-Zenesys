@@ -1,10 +1,20 @@
-from fastapi import FastAPI, Depends, UploadFile, File, HTTPException
+from fastapi import (
+    FastAPI,
+    Depends,
+    UploadFile,
+    File,
+    HTTPException
+)
+
 from sqlalchemy.orm import Session
+
 from pathlib import Path
 import shutil
 
 from database import get_db
 from models import Document
+
+from services.gemini_service import analyze_invoice
 
 app = FastAPI()
 
@@ -58,32 +68,64 @@ def upload_document(
             detail="Only PDF, PNG, JPG and JPEG files are allowed."
         )
 
-    # Create uploads folder if it doesn't exist
+    # Create uploads folder
     upload_folder = Path("uploads")
     upload_folder.mkdir(exist_ok=True)
 
-    # File path
+    # Save file
     file_path = upload_folder / file.filename
 
-    # Save uploaded file
     with file_path.open("wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    # Create database record
+    # Create initial database record
     document = Document(
         file_name=file.filename,
-        document_type="UNKNOWN",
+        document_type="PROCESSING",
         file_path=str(file_path),
-        status="UPLOADED"
+        status="PROCESSING"
     )
 
     db.add(document)
     db.commit()
     db.refresh(document)
 
-    return {
-        "message": "Document uploaded successfully",
-        "document_id": document.id,
-        "file_name": document.file_name,
-        "status": document.status
-    }
+    try:
+
+        # Send document to Gemini
+        extracted_data = analyze_invoice(
+            str(file_path)
+        )
+
+        # Update database
+        document.document_type = extracted_data.get(
+            "document_type",
+            "UNKNOWN"
+        )
+
+        document.extracted_data = extracted_data
+
+        document.status = "AI_EXTRACTED"
+
+        db.commit()
+        db.refresh(document)
+
+        return {
+            "message": "Document processed successfully",
+            "document_id": document.id,
+            "file_name": document.file_name,
+            "document_type": document.document_type,
+            "status": document.status,
+            "extracted_data": extracted_data
+        }
+
+    except Exception as e:
+
+        document.status = "AI_FAILED"
+
+        db.commit()
+
+        raise HTTPException(
+            status_code=500,
+            detail=f"AI processing failed: {str(e)}"
+        )
