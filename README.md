@@ -1,4 +1,10 @@
 # Ai_Powered_Document_Intelligence
 ZENESYS PROJECT
-this is example push ,HELLO THIS IS TECHIE
+-----------------Step 1--------------------
+Create the project files
+check version
+Create virtual environment
+install packages
+
+
 
