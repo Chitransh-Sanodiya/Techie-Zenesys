@@ -343,6 +343,10 @@ def upload_document(
 
     except Exception as e:
 
+        import traceback
+
+        traceback.print_exc()
+
         db.rollback()
 
         document.status = "AI_FAILED"
@@ -351,5 +355,5 @@ def upload_document(
 
         raise HTTPException(
             status_code=500,
-            detail=f"AI processing failed: {str(e)}"
+            detail=f"AI processing failed: {type(e).__name__}: {str(e)}"
         )
