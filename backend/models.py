@@ -126,3 +126,46 @@ class PurchaseOrderItem(Base):
     total_price = Column(
         DECIMAL(12, 2)
     )
+# =========================
+# DOCUMENT MATCH
+# =========================
+
+class DocumentMatch(Base):
+
+    __tablename__ = "document_matches"
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
+
+    purchase_order_id = Column(
+        Integer,
+        nullable=False
+    )
+
+    invoice_id = Column(
+        Integer,
+        nullable=False
+    )
+
+    status = Column(
+        String(50),
+        nullable=False
+    )
+
+    mismatch_count = Column(
+        Integer,
+        default=0
+    )
+
+    mismatch_details = Column(
+        JSON,
+        nullable=True
+    )
+
+    created_at = Column(
+        DateTime,
+        server_default=func.now()
+    )

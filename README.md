@@ -38,4 +38,15 @@ Risk scoring
 Connect risk scoring → database/API 
 
 Purchase Order extraction
+<br>
+-----------------Step 4--------------------
 
+PO ↔ Invoice matching
+
+Automatic PO discovery # read it before presentation
+
+fixed error
+
+updated databases
+
+run 5-6 unique test cases
