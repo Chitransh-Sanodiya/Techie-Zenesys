@@ -16,6 +16,12 @@ from models import Document
 
 from services.gemini_service import analyze_invoice
 
+from services.invoice_service import save_invoice_to_database
+
+from services.validation_service import validate_invoice
+
+from services.risk_service import calculate_risk_score
+
 app = FastAPI()
 
 
@@ -105,6 +111,27 @@ def upload_document(
 
         document.extracted_data = extracted_data
 
+        # Validate extracted invoice data
+        validation_result = validate_invoice(
+            extracted_data
+        )
+        risk_result = calculate_risk_score(
+            validation_result,
+            extracted_data
+        )
+        if extracted_data.get("document_type") == "invoice":
+
+            invoice = save_invoice_to_database(
+                db=db,
+                document_id=document.id,
+                invoice_data=extracted_data
+            )
+
+            invoice.risk_score = risk_result["score"]
+            invoice.status = risk_result["level"]
+
+            db.commit()
+
         document.status = "AI_EXTRACTED"
 
         db.commit()
@@ -116,10 +143,14 @@ def upload_document(
             "file_name": document.file_name,
             "document_type": document.document_type,
             "status": document.status,
-            "extracted_data": extracted_data
+            "extracted_data": extracted_data,
+            "validation": validation_result,
+            "risk": risk_result
         }
 
     except Exception as e:
+
+        db.rollback()
 
         document.status = "AI_FAILED"
 

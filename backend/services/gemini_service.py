@@ -91,3 +91,74 @@ Rules:
     result = result.strip()
 
     return json.loads(result)
+def analyze_purchase_order(file_path: str):
+
+    # Upload the document to Gemini
+    uploaded_file = client.files.upload(
+        file=file_path
+    )
+
+    prompt = """
+You are an AI business document intelligence system.
+
+Analyze the uploaded document as a PURCHASE ORDER.
+
+Return ONLY valid JSON.
+
+Use exactly this structure:
+
+{
+    "document_type": "purchase_order",
+    "po_number": null,
+    "po_date": null,
+    "vendor": null,
+    "total": null,
+    "items": [
+        {
+            "name": null,
+            "quantity": null,
+            "unit_price": null,
+            "total_price": null
+        }
+    ]
+}
+
+Rules:
+
+1. Extract the purchase order number.
+2. Extract the purchase order date.
+3. Extract the vendor/supplier name.
+4. Extract every line item.
+5. Extract quantity for every item.
+6. Extract unit price for every item.
+7. Extract total price for every item.
+8. Extract the purchase order total.
+9. If a value cannot be found, use null.
+10. Do not invent information.
+11. Return ONLY JSON.
+"""
+
+    response = client.models.generate_content(
+        model="gemini-3.5-flash-lite",
+        contents=[
+            uploaded_file,
+            prompt
+        ]
+    )
+
+    result = response.text.strip()
+
+    # Remove markdown code fences if Gemini adds them
+
+    if result.startswith("```json"):
+        result = result[7:]
+
+    if result.startswith("```"):
+        result = result[3:]
+
+    if result.endswith("```"):
+        result = result[:-3]
+
+    result = result.strip()
+
+    return json.loads(result)

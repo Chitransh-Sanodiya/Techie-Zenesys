@@ -11,12 +11,31 @@ Create virtual environment
 
 install packages
 <br>
-----------------Step 2---------------------
+-----------------Step 2--------------------
 
 Created databases
 
 conneccted fastapi and mysql
 
 Example execution
+<br>
+-----------------Step 3--------------------
 
+Updated Backend
+
+Created Key using gemini lite (FREE TIER)
+
+connected Gemini with backend and executed some test cases
+<br>
+-----------------Step 4--------------------
+
+ERP invoice records
+
+Validation engine
+
+Risk scoring
+
+Connect risk scoring → database/API 
+
+Purchase Order extraction
 
