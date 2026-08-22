@@ -39,7 +39,6 @@ function App() {
       setSummary(summaryRes.data);
       setInvoices(invoicesRes.data);
       setMatches(matchesRes.data);
-
       setMessage("");
     } catch (error) {
       console.error("Dashboard error:", error);
@@ -69,7 +68,6 @@ function App() {
     }
 
     const formData = new FormData();
-
     formData.append("file", file);
 
     try {
@@ -87,9 +85,7 @@ function App() {
       const data = response.data;
 
       if (data.duplicate?.is_duplicate) {
-        setMessage(
-          "⚠️ Duplicate invoice detected!"
-        );
+        setMessage("⚠️ Duplicate invoice detected!");
       } else if (
         data.matching?.status === "MISMATCH"
       ) {
@@ -106,11 +102,9 @@ function App() {
 
       await loadDashboard();
 
-      // Go back to overview after processing
       setTimeout(() => {
         goTo("overview");
       }, 500);
-
     } catch (error) {
       console.error("Upload error:", error);
 
@@ -123,8 +117,56 @@ function App() {
     }
   };
 
-  const riskCount =
+  // =========================
+  // ANALYTICS VALUES
+  // =========================
+
+  const totalInvoices =
+    summary?.total_invoices || 0;
+
+  const highRisk =
     summary?.high_risk_invoices || 0;
+
+  const mismatched =
+    summary?.mismatched_documents || 0;
+
+  const matched =
+    summary?.matched_documents || 0;
+
+  const lowRisk = Math.max(
+    0,
+    totalInvoices - highRisk - mismatched
+  );
+
+  // =========================
+  // DONUT CHART
+  // =========================
+
+  const getChartGradient = () => {
+    if (totalInvoices === 0) {
+      return "conic-gradient(#334155 0deg 360deg)";
+    }
+
+    const lowDegrees =
+      (lowRisk / totalInvoices) * 360;
+
+    const mismatchDegrees =
+      (mismatched / totalInvoices) * 360;
+
+    const highDegrees =
+      (highRisk / totalInvoices) * 360;
+
+    const mismatchEnd =
+      lowDegrees + mismatchDegrees;
+
+    return `
+      conic-gradient(
+        #22c55e 0deg ${lowDegrees}deg,
+        #f59e0b ${lowDegrees}deg ${mismatchEnd}deg,
+        #ef4444 ${mismatchEnd}deg 360deg
+      )
+    `;
+  };
 
   return (
     <div className="dashboard">
@@ -134,8 +176,6 @@ function App() {
       ====================================================== */}
 
       <aside className="sidebar">
-
-        {/* BRAND */}
 
         <div className="brand">
 
@@ -154,8 +194,6 @@ function App() {
         </div>
 
 
-        {/* COMPANY */}
-
         <div className="company-box">
 
           <span>
@@ -163,22 +201,17 @@ function App() {
           </span>
 
           <strong>
-            Demo Company
+            BrightEdge Technologies Pvt. Ltd
           </strong>
 
         </div>
 
-
-        {/* NAVIGATION */}
 
         <nav>
 
           <div className="nav-title">
             WORKSPACE
           </div>
-
-
-          {/* OVERVIEW */}
 
           <button
             className="nav-item active"
@@ -189,8 +222,6 @@ function App() {
           </button>
 
 
-          {/* DOCUMENTS */}
-
           <button
             className="nav-item"
             onClick={() => goTo("documents")}
@@ -200,8 +231,6 @@ function App() {
           </button>
 
 
-          {/* INVOICES */}
-
           <button
             className="nav-item"
             onClick={() => goTo("invoices")}
@@ -210,8 +239,6 @@ function App() {
             Invoices
           </button>
 
-
-          {/* PURCHASE ORDERS */}
 
           <button
             className="nav-item"
@@ -227,8 +254,6 @@ function App() {
           </div>
 
 
-          {/* RISK */}
-
           <button
             className="nav-item"
             onClick={() => goTo("risk")}
@@ -238,8 +263,6 @@ function App() {
           </button>
 
 
-          {/* MATCHING */}
-
           <button
             className="nav-item"
             onClick={() => goTo("matching")}
@@ -248,8 +271,6 @@ function App() {
             PO Matching
           </button>
 
-
-          {/* ANALYTICS */}
 
           <button
             className="nav-item"
@@ -261,8 +282,6 @@ function App() {
 
         </nav>
 
-
-        {/* SIDEBAR FOOTER */}
 
         <div className="sidebar-bottom">
 
@@ -280,7 +299,7 @@ function App() {
 
 
       {/* =====================================================
-          MAIN CONTENT
+          MAIN
       ====================================================== */}
 
       <main
@@ -288,10 +307,7 @@ function App() {
         id="overview"
       >
 
-
-        {/* =================================================
-            TOP BAR
-        ================================================== */}
+        {/* TOP BAR */}
 
         <div className="topbar">
 
@@ -308,13 +324,9 @@ function App() {
 
           <div className="top-actions">
 
-            <span>
-              ◐
-            </span>
+            <span>◐</span>
 
-            <span>
-              🔔
-            </span>
+            <span>🔔</span>
 
             <div className="avatar">
               C
@@ -325,9 +337,7 @@ function App() {
         </div>
 
 
-        {/* =================================================
-            PAGE HEADER
-        ================================================== */}
+        {/* PAGE HEADER */}
 
         <section
           className="page-header"
@@ -354,8 +364,6 @@ function App() {
 
           <div className="header-actions">
 
-            {/* REFRESH */}
-
             <button
               className="secondary-btn"
               onClick={loadDashboard}
@@ -363,8 +371,6 @@ function App() {
               ↻ Refresh
             </button>
 
-
-            {/* FILE SELECT */}
 
             <label className="primary-btn">
 
@@ -383,8 +389,6 @@ function App() {
 
             </label>
 
-
-            {/* ANALYZE */}
 
             {file && (
 
@@ -405,9 +409,7 @@ function App() {
         </section>
 
 
-        {/* =================================================
-            MESSAGE
-        ================================================== */}
+        {/* MESSAGE */}
 
         {message && (
 
@@ -418,25 +420,17 @@ function App() {
         )}
 
 
-        {/* =================================================
-            KPI CARDS
-        ================================================== */}
+        {/* KPI CARDS */}
 
         <section className="metrics">
 
-          {/* INVOICES */}
-
           <Metric
             label="Total Invoices"
-            value={
-              summary?.total_invoices ?? "-"
-            }
+            value={totalInvoices}
             icon="▤"
             subtitle="Processed documents"
           />
 
-
-          {/* VALUE */}
 
           <Metric
             label="Invoice Volume"
@@ -450,8 +444,6 @@ function App() {
           />
 
 
-          {/* PURCHASE ORDERS */}
-
           <Metric
             label="Purchase Orders"
             value={
@@ -462,11 +454,9 @@ function App() {
           />
 
 
-          {/* RISK */}
-
           <Metric
             label="High Risk"
-            value={riskCount}
+            value={highRisk}
             icon="!"
             subtitle="Needs attention"
             danger
@@ -475,15 +465,14 @@ function App() {
         </section>
 
 
-        {/* =================================================
+        {/* =====================================================
             ANALYTICS
-        ================================================== */}
+        ====================================================== */}
 
         <section
           className="analytics-grid"
           id="analytics"
         >
-
 
           {/* AI INSIGHT */}
 
@@ -532,7 +521,7 @@ function App() {
                 <div>
 
                   <strong>
-                    {summary?.matched_documents ?? 0}
+                    {matched}
                   </strong>
 
                   <span>
@@ -545,7 +534,7 @@ function App() {
                 <div>
 
                   <strong>
-                    {summary?.mismatched_documents ?? 0}
+                    {mismatched}
                   </strong>
 
                   <span>
@@ -607,7 +596,7 @@ function App() {
               <div className="risk-circle">
 
                 <strong>
-                  {riskCount}
+                  {highRisk}
                 </strong>
 
                 <span>
@@ -621,33 +610,127 @@ function App() {
 
                 <RiskBar
                   label="High Risk"
-                  value={riskCount}
-                  total={
-                    summary?.total_invoices || 1
-                  }
+                  value={highRisk}
+                  total={totalInvoices || 1}
                 />
 
 
                 <RiskBar
                   label="Matched"
-                  value={
-                    summary?.matched_documents || 0
-                  }
-                  total={
-                    summary?.total_invoices || 1
-                  }
+                  value={matched}
+                  total={totalInvoices || 1}
                 />
 
 
                 <RiskBar
                   label="Mismatched"
-                  value={
-                    summary?.mismatched_documents || 0
-                  }
-                  total={
-                    summary?.total_invoices || 1
-                  }
+                  value={mismatched}
+                  total={totalInvoices || 1}
                 />
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          {/* =================================================
+              NEW ANALYTICS CHART
+          ================================================== */}
+
+          <div className="panel analytics-chart">
+
+            <div className="panel-header">
+
+              <div>
+
+                <span className="panel-label">
+                  ANALYTICS
+                </span>
+
+                <h2>
+                  Invoice Risk Distribution
+                </h2>
+
+              </div>
+
+              <span className="ai-badge">
+                ✦ AI Analysis
+              </span>
+
+            </div>
+
+
+            <div className="chart-container">
+
+              <div
+                className="donut-chart"
+                style={{
+                  background: getChartGradient(),
+                }}
+              >
+
+                <div className="donut-center">
+
+                  <strong>
+                    {totalInvoices}
+                  </strong>
+
+                  <span>
+                    Invoices
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              <div className="chart-legend">
+
+                <div>
+
+                  <span className="legend-dot low"></span>
+
+                  <span>
+                    Low Risk
+                  </span>
+
+                  <strong>
+                    {lowRisk}
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <span className="legend-dot medium"></span>
+
+                  <span>
+                    Mismatch
+                  </span>
+
+                  <strong>
+                    {mismatched}
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <span className="legend-dot high"></span>
+
+                  <span>
+                    High Risk
+                  </span>
+
+                  <strong>
+                    {highRisk}
+                  </strong>
+
+                </div>
 
               </div>
 
@@ -658,9 +741,9 @@ function App() {
         </section>
 
 
-        {/* =================================================
+        {/* =====================================================
             PO MATCHING
-        ================================================== */}
+        ====================================================== */}
 
         <section
           className="panel"
@@ -697,7 +780,7 @@ function App() {
               </span>
 
               <strong>
-                {summary?.matched_documents ?? 0}
+                {matched}
               </strong>
 
             </div>
@@ -710,7 +793,7 @@ function App() {
               </span>
 
               <strong>
-                {summary?.mismatched_documents ?? 0}
+                {mismatched}
               </strong>
 
             </div>
@@ -730,8 +813,6 @@ function App() {
 
           </div>
 
-
-          {/* MATCH TABLE */}
 
           {matches.length > 0 && (
 
@@ -766,8 +847,9 @@ function App() {
 
                 <tbody>
 
-                  {matches.slice(0, 5).map(
-                    (match) => (
+                  {matches
+                    .slice(0, 5)
+                    .map((match) => (
 
                       <tr key={match.id}>
 
@@ -799,8 +881,7 @@ function App() {
 
                       </tr>
 
-                    )
-                  )}
+                    ))}
 
                 </tbody>
 
@@ -813,9 +894,9 @@ function App() {
         </section>
 
 
-        {/* =================================================
+        {/* =====================================================
             INVOICES
-        ================================================== */}
+        ====================================================== */}
 
         <section
           className="panel"
@@ -953,9 +1034,7 @@ function App() {
         </section>
 
 
-        {/* =================================================
-            FOOTER
-        ================================================== */}
+        {/* FOOTER */}
 
         <footer>
 
@@ -977,7 +1056,7 @@ function App() {
 
 
 /* =========================================================
-   METRIC COMPONENT
+   METRIC
 ========================================================= */
 
 function Metric({
@@ -987,7 +1066,6 @@ function Metric({
   subtitle,
   danger,
 }) {
-
   return (
 
     <div className="metric">
@@ -1028,7 +1106,7 @@ function Metric({
 
 
 /* =========================================================
-   RISK BAR COMPONENT
+   RISK BAR
 ========================================================= */
 
 function RiskBar({
@@ -1037,11 +1115,10 @@ function RiskBar({
   total,
 }) {
 
-  const percentage =
-    Math.min(
-      (value / total) * 100,
-      100
-    );
+  const percentage = Math.min(
+    (value / total) * 100,
+    100
+  );
 
   return (
 

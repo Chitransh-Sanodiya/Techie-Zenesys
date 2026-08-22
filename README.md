@@ -43,7 +43,7 @@ Purchase Order extraction
 
 PO ↔ Invoice matching
 
-Automatic PO discovery # read it before presentation
+Automatic PO discovery 
 
 fixed error
 
@@ -55,4 +55,8 @@ run 5-6 unique test cases
 
 Frontend 
 
-frontend and backend ko jodna
+frontend and backend connection
+<br>
+-----------------Final--------------------
+
+Finalization
